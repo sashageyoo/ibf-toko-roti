@@ -1,11 +1,11 @@
-import { v } from "convex/values"
-import { query, mutation } from "./_generated/server"
+import { v } from "convex/values";
+import { query, mutation } from "./_generated/server";
 
 // Get all finished products with their total stock
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const products = await ctx.db.query("finishedProducts").collect()
+    const products = await ctx.db.query("finishedProducts").collect();
 
     // Calculate total stock for each product from productStock
     const productsWithStock = await Promise.all(
@@ -13,30 +13,30 @@ export const list = query({
         const stockEntries = await ctx.db
           .query("productStock")
           .withIndex("by_product", (q) => q.eq("productId", product._id))
-          .collect()
+          .collect();
 
-        const totalStock = stockEntries.reduce((sum, entry) => sum + entry.quantity, 0)
-        const isLowStock = totalStock < product.minStock
+        const totalStock = stockEntries.reduce((sum, entry) => sum + entry.quantity, 0);
+        const isLowStock = totalStock < product.minStock;
 
         return {
           ...product,
           totalStock,
           isLowStock,
-        }
+        };
       }),
-    )
+    );
 
-    return productsWithStock
+    return productsWithStock;
   },
-})
+});
 
 // Get a single finished product by ID
 export const get = query({
   args: { id: v.id("finishedProducts") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id)
+    return await ctx.db.get(args.id);
   },
-})
+});
 
 // Create a new finished product
 export const create = mutation({
@@ -53,15 +53,15 @@ export const create = mutation({
     const existing = await ctx.db
       .query("finishedProducts")
       .withIndex("by_sku", (q) => q.eq("sku", args.sku))
-      .first()
+      .first();
 
     if (existing) {
-      throw new Error("SKU already exists")
+      throw new Error("SKU already exists");
     }
 
-    return await ctx.db.insert("finishedProducts", args)
+    return await ctx.db.insert("finishedProducts", args);
   },
-})
+});
 
 // Update a finished product
 export const update = mutation({
@@ -75,10 +75,10 @@ export const update = mutation({
     shelfLifeDays: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { id, ...data } = args
-    await ctx.db.patch(id, data)
+    const { id, ...data } = args;
+    await ctx.db.patch(id, data);
   },
-})
+});
 
 // Delete a finished product
 export const remove = mutation({
@@ -88,15 +88,15 @@ export const remove = mutation({
     const bom = await ctx.db
       .query("boms")
       .withIndex("by_product", (q) => q.eq("productId", args.id))
-      .first()
+      .first();
 
     if (bom) {
-      throw new Error("Cannot delete: product has a recipe")
+      throw new Error("Cannot delete: product has a recipe");
     }
 
-    await ctx.db.delete(args.id)
+    await ctx.db.delete(args.id);
   },
-})
+});
 
 // Get stock entries for a product (batch details)
 export const getStockEntries = query({
@@ -105,11 +105,19 @@ export const getStockEntries = query({
     const entries = await ctx.db
       .query("productStock")
       .withIndex("by_expiry", (q) => q.eq("productId", args.productId))
-      .collect()
+      .collect();
 
-    return entries.sort((a, b) => a.expiryDate - b.expiryDate)
+    return entries.sort((a, b) => a.expiryDate - b.expiryDate);
   },
-})
+});
+
+// Get all stock entries for all products (for batch list view)
+export const getAllStockEntries = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("productStock").collect();
+  },
+});
 
 // Deduct stock using FEFO (First-Expired, First-Out)
 export const deductStock = mutation({
@@ -121,36 +129,36 @@ export const deductStock = mutation({
     const stockEntries = await ctx.db
       .query("productStock")
       .withIndex("by_expiry", (q) => q.eq("productId", args.productId))
-      .collect()
+      .collect();
 
     // Sort by expiry date (FEFO)
-    stockEntries.sort((a, b) => a.expiryDate - b.expiryDate)
+    stockEntries.sort((a, b) => a.expiryDate - b.expiryDate);
 
-    const totalStock = stockEntries.reduce((sum, entry) => sum + entry.quantity, 0)
+    const totalStock = stockEntries.reduce((sum, entry) => sum + entry.quantity, 0);
 
     if (totalStock < args.quantity) {
-      throw new Error(`Insufficient stock. Available: ${totalStock}, Requested: ${args.quantity}`)
+      throw new Error(`Insufficient stock. Available: ${totalStock}, Requested: ${args.quantity}`);
     }
 
-    let remaining = args.quantity
-    const usedEntries: { entryId: string; quantity: number }[] = []
+    let remaining = args.quantity;
+    const usedEntries: { entryId: string; quantity: number }[] = [];
 
     for (const entry of stockEntries) {
-      if (remaining <= 0) break
+      if (remaining <= 0) break;
 
-      const toDeduct = Math.min(entry.quantity, remaining)
-      const newQuantity = entry.quantity - toDeduct
+      const toDeduct = Math.min(entry.quantity, remaining);
+      const newQuantity = entry.quantity - toDeduct;
 
       if (newQuantity === 0) {
-        await ctx.db.delete(entry._id)
+        await ctx.db.delete(entry._id);
       } else {
-        await ctx.db.patch(entry._id, { quantity: newQuantity })
+        await ctx.db.patch(entry._id, { quantity: newQuantity });
       }
 
-      usedEntries.push({ entryId: entry._id, quantity: toDeduct })
-      remaining -= toDeduct
+      usedEntries.push({ entryId: entry._id, quantity: toDeduct });
+      remaining -= toDeduct;
     }
 
-    return usedEntries
+    return usedEntries;
   },
-})
+});

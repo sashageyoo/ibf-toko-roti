@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -12,90 +12,126 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { LayoutDashboard, Package, Boxes, Users, BookOpen, Factory, AlertTriangle, UserCog, Warehouse, ClipboardCheck } from "lucide-react"
-import { useQuery } from "convex/react"
-import { api } from "@/convex/_generated/api"
-import { useAuth } from "@/components/auth-provider"
+} from "@/components/ui/sidebar";
+import {
+  LayoutDashboard,
+  Package,
+  Boxes,
+  Users,
+  BookOpen,
+  Factory,
+  AlertTriangle,
+  UserCog,
+  Warehouse,
+  ClipboardCheck,
+  History,
+  Clock,
+} from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@/components/auth-provider";
 
-type UserRole = "admin" | "manager_inventaris" | "operator_gudang" | "manager_produksi" | "operator_produksi" | "qc"
+type UserRole =
+  | "admin"
+  | "manager_inventaris"
+  | "operator_gudang"
+  | "manager_produksi"
+  | "operator_produksi"
+  | "qc";
 
 const navItems: {
-  title: string
-  href: string
-  icon: typeof LayoutDashboard
-  allowedRoles: UserRole[]
+  title: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  allowedRoles: UserRole[];
 }[] = [
-    {
-      title: "Dashboard",
-      href: "/",
-      icon: LayoutDashboard,
-      allowedRoles: ["admin", "manager_inventaris", "operator_gudang", "manager_produksi", "operator_produksi", "qc"],
-    },
-    {
-      title: "Raw Materials",
-      href: "/raw-materials",
-      icon: Package,
-      allowedRoles: ["admin", "manager_inventaris", "operator_gudang"],
-    },
-    {
-      title: "Finished Products",
-      href: "/finished-products",
-      icon: Boxes,
-      allowedRoles: ["admin", "manager_inventaris", "manager_produksi"],
-    },
-    {
-      title: "Inventory",
-      href: "/inventory",
-      icon: Warehouse,
-      allowedRoles: ["admin", "manager_inventaris", "operator_gudang"],
-    },
-    {
-      title: "Suppliers",
-      href: "/suppliers",
-      icon: Users,
-      allowedRoles: ["admin", "manager_inventaris"],
-    },
-    {
-      title: "Recipes",
-      href: "/recipes",
-      icon: BookOpen,
-      allowedRoles: ["admin", "manager_produksi"],
-    },
-    {
-      title: "Production",
-      href: "/production",
-      icon: Factory,
-      allowedRoles: ["admin", "manager_produksi", "operator_produksi", "qc"],
-    },
-    {
-      title: "Quality Control",
-      href: "/qc",
-      icon: ClipboardCheck,
-      allowedRoles: ["admin", "manager_inventaris", "qc"],
-    },
-  ]
+  {
+    title: "Dasbor",
+    href: "/",
+    icon: LayoutDashboard,
+    allowedRoles: [
+      "admin",
+      "manager_inventaris",
+      "operator_gudang",
+      "manager_produksi",
+      "operator_produksi",
+      "qc",
+    ],
+  },
+  {
+    title: "Bahan Baku",
+    href: "/raw-materials",
+    icon: Package,
+    allowedRoles: ["admin", "manager_inventaris", "operator_gudang"],
+  },
+  {
+    title: "Produk Jadi",
+    href: "/finished-products",
+    icon: Boxes,
+    allowedRoles: ["admin", "manager_inventaris", "manager_produksi"],
+  },
+  {
+    title: "Inventaris",
+    href: "/inventory",
+    icon: Warehouse,
+    allowedRoles: ["admin", "manager_inventaris", "operator_gudang"],
+  },
+  {
+    title: "Pemasok",
+    href: "/suppliers",
+    icon: Users,
+    allowedRoles: ["admin", "manager_inventaris"],
+  },
+  {
+    title: "Resep",
+    href: "/recipes",
+    icon: BookOpen,
+    allowedRoles: ["admin", "manager_produksi"],
+  },
+  {
+    title: "Produksi",
+    href: "/production",
+    icon: Factory,
+    allowedRoles: ["admin", "manager_produksi", "operator_produksi", "qc"],
+  },
+  {
+    title: "Kontrol Kualitas",
+    href: "/qc",
+    icon: ClipboardCheck,
+    allowedRoles: ["admin", "manager_inventaris", "qc"],
+  },
+  {
+    title: "Transaksi",
+    href: "/transactions",
+    icon: History,
+    allowedRoles: ["admin", "manager_inventaris"],
+  },
+];
 
 export function AppSidebar() {
-  const pathname = usePathname()
-  const materials = useQuery(api.rawMaterials.list)
-  const products = useQuery(api.finishedProducts.list)
-  const { user } = useAuth()
+  const pathname = usePathname();
+  const materials = useQuery(api.rawMaterials.list);
+  const products = useQuery(api.finishedProducts.list);
+  const { user } = useAuth();
 
-  const lowStockMaterials = materials?.filter((i) => i.isLowStock).length || 0
-  const lowStockProducts = products?.filter((i) => i.isLowStock).length || 0
-  const totalLowStock = lowStockMaterials + lowStockProducts
+  const lowStockMaterials = materials?.filter((i) => i.isLowStock).length || 0;
+  const lowStockProducts = products?.filter((i) => i.isLowStock).length || 0;
+  const totalLowStock = lowStockMaterials + lowStockProducts;
+
+  // Query for expired batches
+  const expiredBatches = useQuery(api.batches.getExpiredBatches);
+  const expiredCount = expiredBatches?.length || 0;
 
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-6 py-4">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Factory className="h-4 w-4" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">IBF Bakery</span>
-            <span className="text-xs text-muted-foreground">Manufacturing System</span>
+          <div className="flex h-12 items-center justify-center">
+            <img
+              src="/ibf-long-white-logo.png"
+              alt="IBF Bakery Logo"
+              className="h-full w-auto object-contain"
+            />
           </div>
         </Link>
       </SidebarHeader>
@@ -123,14 +159,14 @@ export function AppSidebar() {
         {/* Admin Only - User Management */}
         {user?.role === "admin" && (
           <SidebarGroup>
-            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupLabel>Administrasi</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={pathname === "/users"}>
                     <Link href="/users">
                       <UserCog className="h-4 w-4" />
-                      <span>Users</span>
+                      <span>Pengguna</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -139,18 +175,29 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {totalLowStock > 0 && (
+        {(totalLowStock > 0 || expiredCount > 0) && (
           <SidebarGroup>
-            <SidebarGroupLabel>Alerts</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <div className="mx-2 flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <span>{totalLowStock} items low stock</span>
-              </div>
+            <SidebarGroupLabel>Peringatan</SidebarGroupLabel>
+            <SidebarGroupContent className="space-y-2">
+              {totalLowStock > 0 && (
+                <div className="mx-2 flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>{totalLowStock} item stok rendah</span>
+                </div>
+              )}
+              {expiredCount > 0 && (
+                <Link
+                  href="/inventory"
+                  className="mx-2 flex items-center gap-2 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800 hover:bg-red-200 transition-colors"
+                >
+                  <Clock className="h-4 w-4" />
+                  <span>{expiredCount} batch kedaluwarsa</span>
+                </Link>
+              )}
             </SidebarGroupContent>
           </SidebarGroup>
         )}
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

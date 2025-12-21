@@ -1,5 +1,5 @@
-import { defineSchema, defineTable } from "convex/server"
-import { v } from "convex/values"
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
 
 export default defineSchema({
   // Users (Simple role management with authentication)
@@ -14,7 +14,7 @@ export default defineSchema({
       v.literal("operator_gudang"),
       v.literal("manager_produksi"),
       v.literal("operator_produksi"),
-      v.literal("qc")
+      v.literal("qc"),
     ),
   }).index("by_username", ["username"]),
 
@@ -52,13 +52,16 @@ export default defineSchema({
     quantity: v.number(),
     expiryDate: v.number(),
     receivedDate: v.number(),
-    // QC Status: pending (needs review), release (approved), hold (temporary), reject (failed)
-    qcStatus: v.optional(v.union(
-      v.literal("pending"),
-      v.literal("release"),
-      v.literal("hold"),
-      v.literal("reject")
-    )),
+    // QC Status: pending (needs review), release (approved), hold (temporary), reject (failed), expired (past expiry date)
+    qcStatus: v.optional(
+      v.union(
+        v.literal("pending"),
+        v.literal("release"),
+        v.literal("hold"),
+        v.literal("reject"),
+        v.literal("expired"),
+      ),
+    ),
   })
     .index("by_material", ["materialId"])
     .index("by_expiry", ["materialId", "expiryDate"])
@@ -99,7 +102,8 @@ export default defineSchema({
     notes: v.optional(v.string()),
     startDate: v.number(),
     completedDate: v.optional(v.number()),
-  }),
+    archivedAt: v.optional(v.number()), // Soft delete timestamp
+  }).index("by_archived", ["archivedAt"]),
 
   // Material Requests (Production → Warehouse workflow)
   materialRequests: defineTable({
@@ -110,7 +114,7 @@ export default defineSchema({
       v.literal("pending"),
       v.literal("approved"),
       v.literal("rejected"),
-      v.literal("completed")
+      v.literal("completed"),
     ),
     approvedBy: v.optional(v.id("users")),
     executedBy: v.optional(v.id("users")),
@@ -128,15 +132,45 @@ export default defineSchema({
     adjustmentType: v.union(v.literal("increase"), v.literal("decrease")),
     quantity: v.number(),
     reason: v.string(),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("approved"),
-      v.literal("rejected")
-    ),
+    status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
     approvedBy: v.optional(v.id("users")),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_status", ["status"])
     .index("by_batch", ["batchId"]),
-})
+
+  // Transaction Logs (Audit trail for all stock movements)
+  transactionLogs: defineTable({
+    type: v.union(
+      v.literal("batch_received"),
+      v.literal("batch_used"),
+      v.literal("batch_expired_disposed"),
+      v.literal("production_completed"),
+    ),
+    batchId: v.optional(v.string()), // Store as string since batch may be deleted
+    batchNumber: v.optional(v.string()),
+    materialId: v.optional(v.id("rawMaterials")),
+    productionRunId: v.optional(v.id("productionRuns")),
+    quantity: v.number(),
+    userId: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    archivedAt: v.optional(v.number()), // Soft delete timestamp
+    createdAt: v.number(),
+  })
+    .index("by_type", ["type"])
+    .index("by_material", ["materialId"])
+    .index("by_archived", ["archivedAt"]),
+
+  // Waste Records (Disposed expired batches)
+  wasteRecords: defineTable({
+    originalBatchId: v.string(), // Store as string since batch is deleted
+    batchNumber: v.string(),
+    materialId: v.id("rawMaterials"),
+    quantity: v.number(),
+    expiryDate: v.number(),
+    disposedBy: v.optional(v.string()),
+    disposedAt: v.number(),
+    notes: v.optional(v.string()),
+  }).index("by_material", ["materialId"]),
+});

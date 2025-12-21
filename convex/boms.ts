@@ -1,66 +1,66 @@
-import { v } from "convex/values"
-import { query, mutation } from "./_generated/server"
+import { v } from "convex/values";
+import { query, mutation } from "./_generated/server";
 
 // Get all BOMs with product details
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const boms = await ctx.db.query("boms").collect()
+    const boms = await ctx.db.query("boms").collect();
 
     const bomsWithDetails = await Promise.all(
       boms.map(async (bom) => {
-        const product = await ctx.db.get(bom.productId)
+        const product = await ctx.db.get(bom.productId);
         const bomItems = await ctx.db
           .query("bomItems")
           .withIndex("by_bom", (q) => q.eq("bomId", bom._id))
-          .collect()
+          .collect();
 
         return {
           ...bom,
           productName: product?.name,
           productSku: product?.sku,
           ingredientCount: bomItems.length,
-        }
+        };
       }),
-    )
+    );
 
-    return bomsWithDetails
+    return bomsWithDetails;
   },
-})
+});
 
 // Get a single BOM with all ingredients
 export const get = query({
   args: { id: v.id("boms") },
   handler: async (ctx, args) => {
-    const bom = await ctx.db.get(args.id)
-    if (!bom) return null
+    const bom = await ctx.db.get(args.id);
+    if (!bom) return null;
 
-    const product = await ctx.db.get(bom.productId)
+    const product = await ctx.db.get(bom.productId);
     const bomItems = await ctx.db
       .query("bomItems")
       .withIndex("by_bom", (q) => q.eq("bomId", bom._id))
-      .collect()
+      .collect();
 
     const ingredients = await Promise.all(
       bomItems.map(async (item) => {
-        const material = await ctx.db.get(item.materialId)
+        const material = await ctx.db.get(item.materialId);
         return {
           ...item,
           materialName: material?.name,
           materialUnit: material?.unit,
           materialSku: material?.sku,
-        }
+        };
       }),
-    )
+    );
 
     return {
       ...bom,
       productName: product?.name,
       productSku: product?.sku,
       ingredients,
-    }
+    };
   },
-})
+});
 
 // Create a new BOM
 export const create = mutation({
@@ -70,9 +70,9 @@ export const create = mutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("boms", args)
+    return await ctx.db.insert("boms", args);
   },
-})
+});
 
 // Add ingredient to BOM
 export const addIngredient = mutation({
@@ -83,22 +83,22 @@ export const addIngredient = mutation({
   },
   handler: async (ctx, args) => {
     // Validate material exists
-    const material = await ctx.db.get(args.materialId)
+    const material = await ctx.db.get(args.materialId);
     if (!material) {
-      throw new Error("Raw material not found")
+      throw new Error("Raw material not found");
     }
 
-    return await ctx.db.insert("bomItems", args)
+    return await ctx.db.insert("bomItems", args);
   },
-})
+});
 
 // Remove ingredient from BOM
 export const removeIngredient = mutation({
   args: { id: v.id("bomItems") },
   handler: async (ctx, args) => {
-    await ctx.db.delete(args.id)
+    await ctx.db.delete(args.id);
   },
-})
+});
 
 // Delete BOM and its items
 export const remove = mutation({
@@ -108,15 +108,15 @@ export const remove = mutation({
     const bomItems = await ctx.db
       .query("bomItems")
       .withIndex("by_bom", (q) => q.eq("bomId", args.id))
-      .collect()
+      .collect();
 
     for (const item of bomItems) {
-      await ctx.db.delete(item._id)
+      await ctx.db.delete(item._id);
     }
 
-    await ctx.db.delete(args.id)
+    await ctx.db.delete(args.id);
   },
-})
+});
 
 // MRP Calculation - Calculate requirements for a production run
 export const calculateRequirements = query({
@@ -125,27 +125,27 @@ export const calculateRequirements = query({
     targetQuantity: v.number(),
   },
   handler: async (ctx, args) => {
-    const bom = await ctx.db.get(args.bomId)
-    if (!bom) throw new Error("BOM not found")
+    const bom = await ctx.db.get(args.bomId);
+    if (!bom) throw new Error("BOM not found");
 
     const bomItems = await ctx.db
       .query("bomItems")
       .withIndex("by_bom", (q) => q.eq("bomId", args.bomId))
-      .collect()
+      .collect();
 
     const requirements = await Promise.all(
       bomItems.map(async (item) => {
-        const material = await ctx.db.get(item.materialId)
-        if (!material) return null
+        const material = await ctx.db.get(item.materialId);
+        if (!material) return null;
 
         // Get total stock from batches
         const batches = await ctx.db
           .query("batches")
           .withIndex("by_material", (q) => q.eq("materialId", item.materialId))
-          .collect()
+          .collect();
 
-        const currentStock = batches.reduce((sum, batch) => sum + batch.quantity, 0)
-        const requiredAmount = item.quantity * args.targetQuantity
+        const currentStock = batches.reduce((sum, batch) => sum + batch.quantity, 0);
+        const requiredAmount = item.quantity * args.targetQuantity;
 
         return {
           materialId: item.materialId,
@@ -155,10 +155,10 @@ export const calculateRequirements = query({
           currentStock,
           isShortage: currentStock < requiredAmount,
           shortageAmount: Math.max(0, requiredAmount - currentStock),
-        }
+        };
       }),
-    )
+    );
 
-    return requirements.filter(Boolean)
+    return requirements.filter(Boolean);
   },
-})
+});

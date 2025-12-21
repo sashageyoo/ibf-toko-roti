@@ -16,7 +16,9 @@ import type * as production from "../production.js";
 import type * as rawMaterials from "../rawMaterials.js";
 import type * as seed from "../seed.js";
 import type * as suppliers from "../suppliers.js";
+import type * as transactionLogs from "../transactionLogs.js";
 import type * as users from "../users.js";
+import type * as wasteRecords from "../wasteRecords.js";
 
 import type {
   ApiFromModules,
@@ -33,7 +35,9 @@ declare const fullApi: ApiFromModules<{
   rawMaterials: typeof rawMaterials;
   seed: typeof seed;
   suppliers: typeof suppliers;
+  transactionLogs: typeof transactionLogs;
   users: typeof users;
+  wasteRecords: typeof wasteRecords;
 }>;
 
 /**
