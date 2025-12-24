@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -68,7 +68,7 @@ const deductStockSchema = z.object({
 type CreateProductFormValues = z.infer<typeof createProductSchema>;
 type DeductStockFormValues = z.infer<typeof deductStockSchema>;
 
-export default function FinishedProductsPage() {
+function FinishedProductsContent() {
   const { user } = useAuth();
   const role = user?.role as UserRole | undefined;
 
@@ -533,5 +533,13 @@ export default function FinishedProductsPage() {
         </Table>
       </div>
     </div>
+  );
+}
+
+export default function FinishedProductsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FinishedProductsContent />
+    </Suspense>
   );
 }

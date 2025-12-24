@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -44,7 +44,7 @@ const createMaterialSchema = z.object({
 
 type CreateMaterialFormValues = z.infer<typeof createMaterialSchema>;
 
-export default function RawMaterialsPage() {
+function RawMaterialsContent() {
   const { user } = useAuth();
   const role = user?.role as UserRole | undefined;
 
@@ -269,5 +269,13 @@ export default function RawMaterialsPage() {
         </Table>
       </div>
     </div>
+  );
+}
+
+export default function RawMaterialsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RawMaterialsContent />
+    </Suspense>
   );
 }

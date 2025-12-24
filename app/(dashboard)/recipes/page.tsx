@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -37,7 +37,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus, Trash2, BookOpen, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
-export default function RecipesPage() {
+function RecipesContent() {
   const boms = useQuery(api.boms.list);
   const finishedProducts = useQuery(api.finishedProducts.list);
   const rawMaterials = useQuery(api.rawMaterials.list);
@@ -339,5 +339,13 @@ export default function RecipesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function RecipesPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RecipesContent />
+    </Suspense>
   );
 }

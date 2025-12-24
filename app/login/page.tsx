@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,19 +52,21 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0 bg-card text-card-foreground">
+      <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="space-y-1 text-center pb-8">
-          <div className="mx-auto mb-6 h-24 w-auto flex items-center justify-center">
-            <img
-              src="/ibf-long-white-logo.png"
+          <div className="mx-auto mb-6 h-24 w-auto flex items-center justify-center relative">
+            <Image
+              src="/ibf-long-black-logo.png"
               alt="IBF Bakery Logo"
-              className="h-full w-auto object-contain"
+              fill
+              className="object-contain"
+              priority
             />
           </div>
-          <CardTitle className="text-2xl font-bold font-serif text-card-foreground">
+          <CardTitle className="text-2xl font-bold font-serif">
             Selamat Datang
           </CardTitle>
-          <CardDescription className="text-card-foreground/70">
+          <CardDescription className="text-[#6B5344]">
             Sistem Manufaktur IBF Bakery
           </CardDescription>
         </CardHeader>
@@ -79,7 +82,7 @@ export default function LoginPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={isLoading}
                 autoComplete="username"
-                className="bg-input text-primary border-input"
+                className="bg-white border-[#8B7355] text-[#4A3728]"
               />
             </div>
             <div className="space-y-2">
@@ -92,12 +95,12 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 autoComplete="current-password"
-                className="bg-input text-primary border-input"
+                className="bg-white border-[#8B7355] text-[#4A3728]"
               />
             </div>
             <Button
               type="submit"
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="w-full bg-[#4A3728] text-[#FFF8E7] hover:bg-[#5D4A3A]"
               disabled={isLoading}
             >
               {isLoading ? (

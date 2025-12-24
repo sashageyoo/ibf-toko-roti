@@ -55,26 +55,26 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+            <AvatarFallback className="bg-[#4A3728] text-[#FFF8E7] text-xs">
               {initials}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-56 bg-[#FFF8E7] border-2 border-[#8B7355] text-[#4A3728]" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium leading-none">{user.name}</p>
+              <p className="text-sm font-medium leading-none text-[#4A3728]">{user.name}</p>
               <Badge variant="outline" className={`text-xs ${roleColors[user.role] || ""}`}>
                 {roleLabels[user.role] || user.role}
               </Badge>
             </div>
-            <p className="text-xs leading-none text-muted-foreground">@{user.username}</p>
+            <p className="text-xs leading-none text-[#6B5344]">@{user.username}</p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
+        <DropdownMenuSeparator className="bg-[#8B7355]/30" />
+        <DropdownMenuItem onClick={logout} className="text-red-700 cursor-pointer hover:bg-[#8B7355]/10 focus:bg-[#8B7355]/10 focus:text-red-700">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Keluar</span>
         </DropdownMenuItem>

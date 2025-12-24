@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQueryState } from "nuqs";
 import { SearchInput } from "@/components/search-input";
 import { useQuery, useMutation } from "convex/react";
@@ -65,7 +65,7 @@ function formatDateTime(timestamp: number): string {
   });
 }
 
-export default function TransactionsPage() {
+function TransactionsContent() {
   const { user } = useAuth();
   const role = user?.role as UserRole | undefined;
 
@@ -235,5 +235,13 @@ export default function TransactionsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function TransactionsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TransactionsContent />
+    </Suspense>
   );
 }

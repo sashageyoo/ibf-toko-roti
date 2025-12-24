@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Sidebar,
@@ -45,68 +46,68 @@ const navItems: {
   icon: typeof LayoutDashboard;
   allowedRoles: UserRole[];
 }[] = [
-  {
-    title: "Dasbor",
-    href: "/",
-    icon: LayoutDashboard,
-    allowedRoles: [
-      "admin",
-      "manager_inventaris",
-      "operator_gudang",
-      "manager_produksi",
-      "operator_produksi",
-      "qc",
-    ],
-  },
-  {
-    title: "Bahan Baku",
-    href: "/raw-materials",
-    icon: Package,
-    allowedRoles: ["admin", "manager_inventaris", "operator_gudang"],
-  },
-  {
-    title: "Produk Jadi",
-    href: "/finished-products",
-    icon: Boxes,
-    allowedRoles: ["admin", "manager_inventaris", "manager_produksi"],
-  },
-  {
-    title: "Inventaris",
-    href: "/inventory",
-    icon: Warehouse,
-    allowedRoles: ["admin", "manager_inventaris", "operator_gudang"],
-  },
-  {
-    title: "Pemasok",
-    href: "/suppliers",
-    icon: Users,
-    allowedRoles: ["admin", "manager_inventaris"],
-  },
-  {
-    title: "Resep",
-    href: "/recipes",
-    icon: BookOpen,
-    allowedRoles: ["admin", "manager_produksi"],
-  },
-  {
-    title: "Produksi",
-    href: "/production",
-    icon: Factory,
-    allowedRoles: ["admin", "manager_produksi", "operator_produksi", "qc"],
-  },
-  {
-    title: "Kontrol Kualitas",
-    href: "/qc",
-    icon: ClipboardCheck,
-    allowedRoles: ["admin", "manager_inventaris", "qc"],
-  },
-  {
-    title: "Transaksi",
-    href: "/transactions",
-    icon: History,
-    allowedRoles: ["admin", "manager_inventaris"],
-  },
-];
+    {
+      title: "Dasbor",
+      href: "/",
+      icon: LayoutDashboard,
+      allowedRoles: [
+        "admin",
+        "manager_inventaris",
+        "operator_gudang",
+        "manager_produksi",
+        "operator_produksi",
+        "qc",
+      ],
+    },
+    {
+      title: "Bahan Baku",
+      href: "/raw-materials",
+      icon: Package,
+      allowedRoles: ["admin", "manager_inventaris", "operator_gudang"],
+    },
+    {
+      title: "Produk Jadi",
+      href: "/finished-products",
+      icon: Boxes,
+      allowedRoles: ["admin", "manager_inventaris", "manager_produksi"],
+    },
+    {
+      title: "Inventaris",
+      href: "/inventory",
+      icon: Warehouse,
+      allowedRoles: ["admin", "manager_inventaris", "operator_gudang"],
+    },
+    {
+      title: "Pemasok",
+      href: "/suppliers",
+      icon: Users,
+      allowedRoles: ["admin", "manager_inventaris"],
+    },
+    {
+      title: "Resep",
+      href: "/recipes",
+      icon: BookOpen,
+      allowedRoles: ["admin", "manager_produksi"],
+    },
+    {
+      title: "Produksi",
+      href: "/production",
+      icon: Factory,
+      allowedRoles: ["admin", "manager_produksi", "operator_produksi", "qc"],
+    },
+    {
+      title: "Kontrol Kualitas",
+      href: "/qc",
+      icon: ClipboardCheck,
+      allowedRoles: ["admin", "manager_inventaris", "qc"],
+    },
+    {
+      title: "Transaksi",
+      href: "/transactions",
+      icon: History,
+      allowedRoles: ["admin", "manager_inventaris"],
+    },
+  ];
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -126,11 +127,12 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-6 py-4">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-12 items-center justify-center">
-            <img
+          <div className="flex h-12 items-center justify-center relative w-full">
+            <Image
               src="/ibf-long-white-logo.png"
               alt="IBF Bakery Logo"
-              className="h-full w-auto object-contain"
+              fill
+              className="object-contain"
             />
           </div>
         </Link>

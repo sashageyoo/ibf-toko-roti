@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -27,7 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 
-export default function SuppliersPage() {
+function SuppliersContent() {
   const suppliers = useQuery(api.suppliers.list);
   const createSupplier = useMutation(api.suppliers.create);
   const deleteSupplier = useMutation(api.suppliers.remove);
@@ -154,5 +154,13 @@ export default function SuppliersPage() {
         </Table>
       </div>
     </div>
+  );
+}
+
+export default function SuppliersPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SuppliersContent />
+    </Suspense>
   );
 }

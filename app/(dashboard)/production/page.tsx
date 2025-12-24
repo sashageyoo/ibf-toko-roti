@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { api } from "@/convex/_generated/api";
@@ -53,7 +53,7 @@ const planProductionSchema = z.object({
 
 type PlanProductionFormValues = z.infer<typeof planProductionSchema>;
 
-export default function ProductionPage() {
+function ProductionContent() {
   const { user } = useAuth();
   const role = user?.role as UserRole | undefined;
 
@@ -103,9 +103,9 @@ export default function ProductionPage() {
     api.boms.calculateRequirements,
     watchedBomId && debouncedTargetQty
       ? {
-          bomId: watchedBomId as Id<"boms">,
-          targetQuantity: Number.parseFloat(debouncedTargetQty) || 0,
-        }
+        bomId: watchedBomId as Id<"boms">,
+        targetQuantity: Number.parseFloat(debouncedTargetQty) || 0,
+      }
       : "skip",
   );
 
@@ -505,5 +505,13 @@ export default function ProductionPage() {
         </Table>
       </div>
     </div>
+  );
+}
+
+export default function ProductionPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductionContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -78,7 +78,7 @@ function isExpired(expiryDate: number): boolean {
   return expiryDate < Date.now();
 }
 
-export default function InventoryPage() {
+function InventoryContent() {
   const { user } = useAuth();
   const role = user?.role as UserRole | undefined;
 
@@ -438,5 +438,13 @@ export default function InventoryPage() {
         </Table>
       </div>
     </div>
+  );
+}
+
+export default function InventoryPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InventoryContent />
+    </Suspense>
   );
 }
